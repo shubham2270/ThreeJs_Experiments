@@ -5,20 +5,6 @@ import * as dat from "dat.gui";
 const loadingManager = new THREE.LoadingManager();
 
 const textureLoader = new THREE.TextureLoader(loadingManager);
-// const alphaTexture = textureLoader.load("/textures/door/alpha.jpg");
-// const ambientOcclusionTexture = textureLoader.load(
-//   "/textures/door/ambientOcclusion.jpg"
-// );
-// const doorColorTexture = textureLoader.load("/textures/door/color.jpg");
-// const doorHeightTexture = textureLoader.load("/textures/door/height.jpg");
-// const doorMetalnessTexture = textureLoader.load("/textures/door/metalness.jpg");
-// const doorNormalTexture = textureLoader.load("/textures/door/normal.jpg");
-// const doorRoughnessTexture = textureLoader.load("/textures/door/roughness.jpg");
-// const matcapTexture = textureLoader.load("/textures/matcaps/3.png");
-// const gradientTexture = textureLoader.load("/textures/gradients/3.jpg");
-
-// gradientTexture.minFilter = THREE.NearestFilter;
-// gradientTexture.manFilter = THREE.NearestFilter;
 
 /**
  * Debug
@@ -39,8 +25,12 @@ const scene = new THREE.Scene();
  */
 // Cube
 const cubeGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
-const cubeMaterial = new THREE.MeshNormalMaterial();
+const cubeMaterial = new THREE.MeshStandardMaterial({
+  color: new THREE.Color("#DCEDC1"),
+});
 const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+cube.receiveShadow = true;
+cube.castShadow = true;
 scene.add(cube);
 
 // Sphere
@@ -60,8 +50,10 @@ scene.add(sphere);
 
 // Cone
 const coneGeometry = new THREE.ConeBufferGeometry(0.5, 1, 14, 1);
-const coneMaterial = new THREE.MeshNormalMaterial();
+const coneMaterial = new THREE.MeshStandardMaterial();
 const cone = new THREE.Mesh(coneGeometry, coneMaterial);
+cone.receiveShadow = true;
+cone.castShadow = true;
 cone.position.x = -1.3;
 scene.add(cone);
 
@@ -98,7 +90,7 @@ ring.rotation.y = -2.36;
 ring.position.x = -2.25;
 ring.position.y = 1.55;
 group.add(ring);
-scene.add(group);
+// scene.add(group);
 
 gui
   .add(group.position, "x")
@@ -137,7 +129,7 @@ torus.position.y = 0.5;
  */
 
 // Directional light
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(2, 2, -1);
 gui.add(directionalLight, "intensity").min(0).max(1).step(0.001);
 gui.add(directionalLight.position, "x").min(-5).max(5).step(0.001);
@@ -149,18 +141,21 @@ directionalLight.castShadow = true;
 
 directionalLight.shadow.mapSize.width = 1024;
 directionalLight.shadow.mapSize.height = 1024;
-directionalLight.shadow.camera.top = 2;
-directionalLight.shadow.camera.right = 2;
-directionalLight.shadow.camera.bottom = -2;
+// directionalLight.shadow.camera.top = 200;
+// directionalLight.shadow.camera.right = 200;
+// directionalLight.shadow.camera.bottom = -200;
 directionalLight.shadow.camera.left = -2;
 directionalLight.shadow.camera.near = 1;
-directionalLight.shadow.camera.far = 6;
+directionalLight.shadow.camera.far = 200;
 directionalLight.shadow.radius = 10;
 
+// Ambient Light
+const light = new THREE.AmbientLight(0xffffff, 0.4); // soft white light
+scene.add(light);
 //Plane
 const geometry = new THREE.PlaneGeometry(10, 10);
 const material = new THREE.MeshStandardMaterial({
-  color: 0x346f99,
+  color: new THREE.Color("#46CDCF"),
   side: THREE.DoubleSide,
 });
 const plane = new THREE.Mesh(geometry, material);
@@ -233,6 +228,7 @@ const tick = () => {
   cube.rotation.y = elapsedTime;
   torus.rotation.y = -elapsedTime;
   group.rotation.y = -elapsedTime * 0.8;
+  sphere.position.z = Math.sin(elapsedTime) * 2;
 
   cone.position.y = Math.sin(elapsedTime * 0.5) + 1;
 
