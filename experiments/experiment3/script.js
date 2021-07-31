@@ -20,6 +20,8 @@ const canvas = document.querySelector("canvas.webgl");
 // Scene
 const scene = new THREE.Scene();
 
+const environment = new THREE.Group();
+
 /**
  * Objects
  */
@@ -86,46 +88,99 @@ const treeCount = 30;
 for (let i = 0; i < treeCount; i++) {
   const x = (Math.random() - 0.5) * 8;
   const z = (Math.random() - 0.5) * 8;
-  scene.add(makeTree(x, z));
+  environment.add(makeTree(x, z));
 }
 
 // Clouds
+
+let clouds = [];
+
 const cloudGeometry = new THREE.IcosahedronGeometry(0.5, 0);
 const cloudMaterial = new THREE.MeshStandardMaterial({
-  color: "0xacb3fb",
+  color: "#acb3fb",
   // flatShading: true,
 });
-const cloud1 = new THREE.Mesh(cloudGeometry, cloudMaterial);
-const cloud2 = new THREE.Mesh(cloudGeometry, cloudMaterial);
-const cloud3 = new THREE.Mesh(cloudGeometry, cloudMaterial);
 
-const cloud2Scale = 0.8;
+const makeCloud = (x, y, z) => {
+  const cloudGroup = new THREE.Group();
+  const cloud1 = new THREE.Mesh(cloudGeometry, cloudMaterial);
+  const cloud2 = new THREE.Mesh(cloudGeometry, cloudMaterial);
+  const cloud3 = new THREE.Mesh(cloudGeometry, cloudMaterial);
 
-cloud1.receiveShadow = true;
-cloud1.castShadow = true;
-cloud1.position.y = 3.5;
-cloud2.receiveShadow = true;
-cloud2.castShadow = true;
-cloud2.position.y = 3.5;
-cloud2.position.x = 0.5;
-cloud2.scale.set(cloud2Scale, cloud2Scale, cloud2Scale);
-cloud3.castShadow = true;
-cloud3.position.y = 3.5;
-cloud3.position.x = -0.5;
-cloud3.scale.set(cloud2Scale, cloud2Scale, cloud2Scale);
-scene.add(cloud1, cloud2, cloud3);
+  const cloudScale = 0.8;
+
+  cloud1.castShadow = true;
+  cloud1.position.y = 3.5;
+  cloud2.castShadow = true;
+  cloud2.position.y = 3.5;
+  cloud2.position.x = 0.5;
+  cloud2.scale.set(cloudScale, cloudScale, cloudScale);
+  cloud3.castShadow = true;
+  cloud3.position.y = 3.5;
+  cloud3.position.x = -0.5;
+  cloud3.scale.set(cloudScale, cloudScale, cloudScale);
+  cloudGroup.add(cloud1, cloud2, cloud3);
+
+  cloudGroup.position.x = x;
+  cloudGroup.position.y = y;
+  cloudGroup.position.z = z;
+
+  clouds.push(cloudGroup);
+
+  return cloudGroup;
+};
+
+// returns small cloud
+const makeSmallCloud = (x, y, z) => {
+  const cloudGroup = new THREE.Group();
+  const cloud1 = new THREE.Mesh(cloudGeometry, cloudMaterial);
+
+  const cloudScale = 0.5;
+
+  cloud1.castShadow = true;
+  cloud1.position.y = 3.5;
+  cloud1.scale.set(cloudScale, cloudScale, cloudScale);
+  cloudGroup.add(cloud1);
+
+  cloudGroup.position.x = x;
+  cloudGroup.position.y = y;
+  cloudGroup.position.z = z;
+
+  clouds.push(cloudGroup);
+
+  return cloudGroup;
+};
+
+const cloudCount = 3;
+for (let i = 0; i < cloudCount; i++) {
+  const x = (Math.random() - 0.5) * 7;
+  const z = (Math.random() - 0.5) * 7;
+  const y = Math.random() - 0.5;
+  environment.add(makeCloud(x, y, z));
+}
+const smallCloudCount = 2;
+for (let i = 0; i < cloudCount; i++) {
+  const x = (Math.random() - 0.5) * 6;
+  const z = (Math.random() - 0.5) * 6;
+  const y = Math.random() - 0.5 * 2;
+  environment.add(makeSmallCloud(x, y, z));
+}
+
+makeCloud();
 
 /**
  * Lights
  */
 // Directional light
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+const directionalLight = new THREE.DirectionalLight(0xfeffd1, 1);
 directionalLight.position.set(2, 2, -1);
 gui.add(directionalLight, "intensity").min(0).max(1).step(0.001);
 gui.add(directionalLight.position, "x").min(-5).max(5).step(0.001);
 gui.add(directionalLight.position, "y").min(-5).max(5).step(0.001);
 gui.add(directionalLight.position, "z").min(-5).max(5).step(0.001);
-scene.add(directionalLight);
+gui.add(directionalLight.shadow.camera, "near").min(0).max(500).step(0.001);
+gui.add(directionalLight.shadow.camera, "far").min(0).max(500).step(0.001);
+environment.add(directionalLight);
 
 directionalLight.castShadow = true;
 
@@ -135,13 +190,20 @@ directionalLight.shadow.mapSize.height = 1024;
 // directionalLight.shadow.camera.right = 200;
 // directionalLight.shadow.camera.bottom = -200;
 // directionalLight.shadow.camera.left = -2;
-// directionalLight.shadow.camera.near = 0;
-// directionalLight.shadow.camera.far = 400;
+// directionalLight.shadow.camera.near = 200;
+// directionalLight.shadow.camera.far = 100;
 // directionalLight.shadow.radius = 100;
 
+// const helper = new THREE.DirectionalLightHelper(directionalLight, 5);
+// scene.add(helper);
+
 // Ambient Light
-const light = new THREE.AmbientLight(0xffffff, 0.4); // soft white light
-scene.add(light);
+const light = new THREE.AmbientLight(0xffffff, 0.5); // soft white light
+environment.add(light);
+
+// Hemisphere light
+const hemisphereLight = new THREE.HemisphereLight(0xffd500, 0x007a, 0.3);
+environment.add(hemisphereLight);
 //land
 const geometry = new THREE.PlaneGeometry(10, 10);
 const material = new THREE.MeshStandardMaterial({
@@ -152,7 +214,9 @@ const land = new THREE.Mesh(geometry, material);
 land.receiveShadow = true;
 land.rotation.x = 1.57;
 land.position.y = -0.55;
-scene.add(land);
+environment.add(land);
+
+scene.add(environment);
 
 /**
  * Sizes
@@ -186,9 +250,9 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   100
 );
-camera.position.x = 5;
-camera.position.y = 2;
-camera.position.z = 5;
+camera.position.x = 8;
+camera.position.y = 20;
+camera.position.z = 4;
 scene.add(camera);
 
 // Controls
@@ -211,13 +275,45 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
  */
 const clock = new THREE.Clock();
 
+let cameraY = 30;
+let cameraAnimate = true;
+let autoRotate = false;
+
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
+  // Animate Tree cones
   for (let i = 0; i < treeConeTop.length; i++) {
     treeConeTop[i].rotation.x = Math.sin(elapsedTime) * 0.15;
     treeConeMiddle[i].rotation.x = Math.sin(elapsedTime) * 0.12;
     treeConeBottom[i].rotation.x = Math.sin(elapsedTime) * 0.09;
+  }
+
+  // Animate clouds
+  for (let i = 0; i < clouds.length; i++) {
+    clouds[i].position.y = Math.cos(elapsedTime) * 0.1;
+  }
+
+  // Animate camera
+  const cameraYPos = 20 - elapsedTime * 5;
+  const defaultPos = cameraYPos < 3;
+  if (defaultPos) {
+    cameraAnimate = false;
+  }
+  if (cameraAnimate) {
+    camera.position.y = defaultPos ? 3 : cameraYPos;
+    camera.position.z = defaultPos ? 4 : cameraYPos;
+  }
+
+  // start auto rotation after daley
+  if (!cameraAnimate) {
+    setTimeout(() => {
+      autoRotate = true;
+    }, 500);
+  }
+
+  if (autoRotate) {
+    environment.rotation.y = Math.PI * 2 * elapsedTime * 0.01;
   }
 
   // Update controls
