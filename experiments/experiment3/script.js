@@ -23,21 +23,28 @@ const scene = new THREE.Scene();
 /**
  * Objects
  */
+// Trees
+let conePosition = 0;
+// storing cone in array to animate in tick function
+let treeConeTop = [];
+let treeConeMiddle = [];
+let treeConeBottom = [];
+
+const coneGeometry = new THREE.ConeBufferGeometry(0.3, 1, 6, 1);
+const coneMaterial = new THREE.MeshStandardMaterial({
+  color: new THREE.Color("#58c74e"),
+});
 
 //  Outputs tree
 const makeTree = (x, z, coneX) => {
-  console.log("called tree");
   const tree = new THREE.Group();
   // Tree cone
   const coneGroup = new THREE.Group();
-  const coneGeometry = new THREE.ConeBufferGeometry(0.3, 1, 6, 1);
-  const coneMaterial = new THREE.MeshStandardMaterial({
-    color: new THREE.Color("#58c74e"),
-  });
+
   const cone1 = new THREE.Mesh(coneGeometry, coneMaterial);
   const cone2 = new THREE.Mesh(coneGeometry, coneMaterial);
   const cone3 = new THREE.Mesh(coneGeometry, coneMaterial);
-  // cone1.rotation.x = coneX;
+
   // cone.receiveShadow = true;
   cone1.castShadow = true;
   cone2.castShadow = true;
@@ -48,6 +55,10 @@ const makeTree = (x, z, coneX) => {
   cone1.position.y = 1.3;
   cone2.position.y = 0.9;
   cone3.position.y = 0.5;
+  // Push all cone in array
+  treeConeTop.push(cone1);
+  treeConeMiddle.push(cone2);
+  treeConeBottom.push(cone3);
   coneGroup.add(cone1, cone2, cone3);
   const randomHeight = Math.random();
   coneGroup.position.y = randomHeight > 0.6 ? 0 : randomHeight;
@@ -66,18 +77,43 @@ const makeTree = (x, z, coneX) => {
   tree.add(trunk);
   tree.position.x = x;
   tree.position.z = z;
+
   return tree;
 };
 
 // No. of tree
-const treeCount = 40;
+const treeCount = 30;
 for (let i = 0; i < treeCount; i++) {
   const x = (Math.random() - 0.5) * 8;
   const z = (Math.random() - 0.5) * 8;
   scene.add(makeTree(x, z));
 }
 
-// scene.add(tree);
+// Clouds
+const cloudGeometry = new THREE.IcosahedronGeometry(0.5, 0);
+const cloudMaterial = new THREE.MeshStandardMaterial({
+  color: "0xacb3fb",
+  // flatShading: true,
+});
+const cloud1 = new THREE.Mesh(cloudGeometry, cloudMaterial);
+const cloud2 = new THREE.Mesh(cloudGeometry, cloudMaterial);
+const cloud3 = new THREE.Mesh(cloudGeometry, cloudMaterial);
+
+const cloud2Scale = 0.8;
+
+cloud1.receiveShadow = true;
+cloud1.castShadow = true;
+cloud1.position.y = 3.5;
+cloud2.receiveShadow = true;
+cloud2.castShadow = true;
+cloud2.position.y = 3.5;
+cloud2.position.x = 0.5;
+cloud2.scale.set(cloud2Scale, cloud2Scale, cloud2Scale);
+cloud3.castShadow = true;
+cloud3.position.y = 3.5;
+cloud3.position.x = -0.5;
+cloud3.scale.set(cloud2Scale, cloud2Scale, cloud2Scale);
+scene.add(cloud1, cloud2, cloud3);
 
 /**
  * Lights
@@ -98,10 +134,10 @@ directionalLight.shadow.mapSize.height = 1024;
 // directionalLight.shadow.camera.top = 200;
 // directionalLight.shadow.camera.right = 200;
 // directionalLight.shadow.camera.bottom = -200;
-directionalLight.shadow.camera.left = -2;
-directionalLight.shadow.camera.near = 1;
-directionalLight.shadow.camera.far = 200;
-directionalLight.shadow.radius = 10;
+// directionalLight.shadow.camera.left = -2;
+// directionalLight.shadow.camera.near = 0;
+// directionalLight.shadow.camera.far = 400;
+// directionalLight.shadow.radius = 100;
 
 // Ambient Light
 const light = new THREE.AmbientLight(0xffffff, 0.4); // soft white light
@@ -178,7 +214,11 @@ const clock = new THREE.Clock();
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
-  // Update Objects
+  for (let i = 0; i < treeConeTop.length; i++) {
+    treeConeTop[i].rotation.x = Math.sin(elapsedTime) * 0.15;
+    treeConeMiddle[i].rotation.x = Math.sin(elapsedTime) * 0.12;
+    treeConeBottom[i].rotation.x = Math.sin(elapsedTime) * 0.09;
+  }
 
   // Update controls
   controls.update();
