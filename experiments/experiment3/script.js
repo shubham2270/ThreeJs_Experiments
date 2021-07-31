@@ -22,6 +22,18 @@ const scene = new THREE.Scene();
 
 const environment = new THREE.Group();
 
+//land
+const geometry = new THREE.PlaneGeometry(10, 10);
+const material = new THREE.MeshStandardMaterial({
+  color: new THREE.Color("#c9bf97"),
+  side: THREE.DoubleSide,
+});
+const land = new THREE.Mesh(geometry, material);
+land.receiveShadow = true;
+land.rotation.x = 1.57;
+land.position.y = -0.55;
+environment.add(land);
+
 /**
  * Objects
  */
@@ -92,7 +104,6 @@ for (let i = 0; i < treeCount; i++) {
 }
 
 // Clouds
-
 let clouds = [];
 
 const cloudGeometry = new THREE.IcosahedronGeometry(0.5, 0);
@@ -168,6 +179,64 @@ for (let i = 0; i < cloudCount; i++) {
 
 makeCloud();
 
+// Fence
+
+const fenceGeometry = new THREE.BoxBufferGeometry(0.2, 1.4, 0.05);
+const fenceMaterial = new THREE.MeshStandardMaterial({
+  color: "#d67d24",
+});
+
+const makeFence = (z) => {
+  const fenceGroup = new THREE.Group();
+  const makeFenceBar1 = (distance) => {
+    const fence1 = new THREE.Mesh(fenceGeometry, fenceMaterial);
+    fence1.receiveShadow = true;
+    fence1.castShadow = true;
+    fence1.position.x = land.geometry.parameters.width / 2 - 0.3;
+    fence1.position.z = distance;
+    fence1.rotation.y = 1.5;
+
+    return fence1;
+  };
+  const makeFenceBar2 = (distance) => {
+    const fence1 = new THREE.Mesh(fenceGeometry, fenceMaterial);
+    fence1.receiveShadow = true;
+    fence1.castShadow = true;
+    fence1.position.x = land.geometry.parameters.width / 2 - 0.3;
+    fence1.rotation.y = 1.57;
+    fence1.position.y = distance;
+    fence1.rotation.z = 1.57;
+    fence1.position.z = 0.45;
+
+    return fence1;
+  };
+
+  const fenceBarCount = 4;
+  for (let i = 0; i < fenceBarCount; i++) {
+    fenceGroup.add(makeFenceBar1(i * 0.3));
+  }
+
+  const fence2BarCount = 2;
+  for (let i = 0; i < fence2BarCount; i++) {
+    fenceGroup.add(makeFenceBar2(i * 0.3));
+  }
+
+  fenceGroup.position.z = z;
+
+  return fenceGroup;
+};
+
+const fenceCount = 3;
+for (let i = 0; i < fenceCount; i++) {
+  // console.log("rrr");
+  // fenceGroup.position.z = i * 1.5;
+  environment.add(makeFence(i * 1.5));
+}
+
+// scene.add(fenceGroup);
+
+//
+
 /**
  * Lights
  */
@@ -204,17 +273,6 @@ environment.add(light);
 // Hemisphere light
 const hemisphereLight = new THREE.HemisphereLight(0xffd500, 0x007a, 0.3);
 environment.add(hemisphereLight);
-//land
-const geometry = new THREE.PlaneGeometry(10, 10);
-const material = new THREE.MeshStandardMaterial({
-  color: new THREE.Color("#c9bf97"),
-  side: THREE.DoubleSide,
-});
-const land = new THREE.Mesh(geometry, material);
-land.receiveShadow = true;
-land.rotation.x = 1.57;
-land.position.y = -0.55;
-environment.add(land);
 
 scene.add(environment);
 
