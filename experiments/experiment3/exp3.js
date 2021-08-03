@@ -242,7 +242,7 @@ for (let i = 0; i < fenceCount; i++) {
  */
 // Directional light
 const directionalLight = new THREE.DirectionalLight(0xfeffd1, 1);
-directionalLight.position.set(2, 2, -1);
+directionalLight.position.set(5, 5, 2.67);
 gui.add(directionalLight, "intensity").min(0).max(1).step(0.001);
 gui.add(directionalLight.position, "x").min(-5).max(5).step(0.001);
 gui.add(directionalLight.position, "y").min(-5).max(5).step(0.001);
@@ -259,11 +259,11 @@ directionalLight.shadow.mapSize.height = 1024;
 // directionalLight.shadow.camera.right = 200;
 // directionalLight.shadow.camera.bottom = -200;
 // directionalLight.shadow.camera.left = -2;
-// directionalLight.shadow.camera.near = 200;
-// directionalLight.shadow.camera.far = 100;
+directionalLight.shadow.camera.near = 0.5;
+directionalLight.shadow.camera.far = 100;
 // directionalLight.shadow.radius = 100;
 
-// const helper = new THREE.DirectionalLightHelper(directionalLight, 5);
+// const helper = new THREE.DirectionalLightHelper(directionalLight, 3);
 // scene.add(helper);
 
 // Ambient Light
