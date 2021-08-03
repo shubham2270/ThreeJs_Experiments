@@ -349,8 +349,10 @@ const tick = () => {
 
   // Animate clouds
   for (let i = 0; i < clouds.length; i++) {
-    clouds[i].position.y = Math.cos(elapsedTime) * 0.1;
+    clouds[i].position.y = Math.cos(elapsedTime) * 0.2;
   }
+  clouds[2].position.y = Math.sin(elapsedTime) * 0.2;
+  clouds[4].position.y = Math.sin(elapsedTime) * 0.2;
 
   // Animate camera
   const cameraYPos = 20 - elapsedTime * 5;
