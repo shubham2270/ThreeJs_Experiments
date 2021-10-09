@@ -180,7 +180,6 @@ for (let i = 0; i < cloudCount; i++) {
 makeCloud();
 
 // Fence
-
 const fenceGeometry = new THREE.BoxBufferGeometry(0.2, 1.4, 0.05);
 const fenceMaterial = new THREE.MeshStandardMaterial({
   color: "#d67d24",
@@ -233,9 +232,23 @@ for (let i = 0; i < fenceCount; i++) {
   environment.add(makeFence(i * 1.5));
 }
 
-// scene.add(fenceGroup);
+// Sun
+const sunGeometry = new THREE.SphereBufferGeometry(Math.random() * 1, 20, 20);
+const sunMaterial = new THREE.MeshPhongMaterial({
+  color: 0xf66120,
+  emissive: 0xf66120,
+  specular: 0xffed22,
+  flatShading: true,
+  shininess: 40,
+  transparent: true,
+  opacity: 1,
+});
+const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+sun.position.y = 4;
+sun.position.x = 5;
+sun.position.z = 5;
 
-//
+environment.add(sun);
 
 /**
  * Lights

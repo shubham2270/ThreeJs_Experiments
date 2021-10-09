@@ -11,6 +11,7 @@
     "three": "^0.130.0"
   },
   "devDependencies": {
-    "vite": "^2.4.3"
+    "vite": "^2.4.3",
+    "vite-plugin-string": "^1.0.1"
   }
 }
